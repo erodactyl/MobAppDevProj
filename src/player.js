@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import Video from "react-native-video";
+import Slider from "react-native-slider";
 import songs from "./mockData";
 
 class Player extends Component {
@@ -12,7 +13,8 @@ class Player extends Component {
       shuffle: false,
       currentTime: 0,
       songIndex: 0,
-      songs: songs[0].songs
+      songs: songs[0].songs,
+      songDuration: 1
     };
   }
 
@@ -44,10 +46,12 @@ class Player extends Component {
 
   goForward = () => {
     this.setState(state => ({
-      songIndex: state.shuffle ? this.randomSongIndex() : state.songIndex + 1,
+      songIndex: state.shuffle
+        ? this.randomSongIndex()
+        : state.songIndex === state.songs.length - 1 ? 0 : state.songIndex + 1,
       currentTime: 0
     }));
-    this.refs.audio.seek(0);
+    this.video.seek(0);
   };
 
   randomSongIndex = () => {
@@ -61,18 +65,20 @@ class Player extends Component {
   };
 
   setTime = params => {
-    if (!this.state.sliding) {
-      this.setState({ currentTime: params.currentTime });
-    }
+    this.setState({ currentTime: params.currentTime });
   };
 
   onLoad = params => {
     this.setState({ songDuration: params.duration });
   };
 
-  onSlidingStart = () => {
-    this.setState({ sliding: true });
+  onSlide = slide => {
+    this.setState({ slide });
+    const seconds = slide * this.state.songDuration;
+    this.video.seek(seconds);
   };
+
+  secondToSlider = () => this.state.currentTime / this.state.songDuration;
 
   render() {
     const song = this.state.songs[this.state.songIndex];
@@ -92,6 +98,7 @@ class Player extends Component {
             this.video = video;
           }}
         />
+        <Slider value={this.secondToSlider()} onValueChange={this.onSlide} />
       </View>
     );
   }
