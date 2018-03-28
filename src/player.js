@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Video from "react-native-video";
 import Slider from "react-native-slider";
 import songs from "./mockData";
@@ -17,6 +17,10 @@ class Player extends Component {
       songDuration: 1
     };
   }
+
+  startCurrSong = () => {
+    this.video.seek(0);
+  };
 
   togglePlay = () => {
     this.setState(state => ({ playing: !state.playing }));
@@ -37,21 +41,20 @@ class Player extends Component {
         currentTime: 0
       }));
     } else {
-      this.refs.audio.seek(0);
       this.setState({
         currentTime: 0
       });
     }
+    this.startCurrSong();
   };
 
   goForward = () => {
     this.setState(state => ({
-      songIndex: state.shuffle
-        ? this.randomSongIndex()
-        : state.songIndex === state.songs.length - 1 ? 0 : state.songIndex + 1,
+      songIndex:
+        state.songIndex === state.songs.length - 1 ? 0 : state.songIndex + 1,
       currentTime: 0
     }));
-    this.video.seek(0);
+    this.startCurrSong();
   };
 
   randomSongIndex = () => {
@@ -91,14 +94,23 @@ class Player extends Component {
           paused={!this.state.playing}
           onLoad={this.onLoad}
           onProgress={this.setTime}
-          onEnd={this.onEnd}
-          resizeMode="cover"
+          onEnd={this.goForward}
           repeat={false}
-          ref={video => {
-            this.video = video;
+          ref={v => {
+            this.video = v;
           }}
         />
         <Slider value={this.secondToSlider()} onValueChange={this.onSlide} />
+        <Text>{this.state.songDuration}</Text>
+        <TouchableOpacity onPress={this.goBackward}>
+          <Text>Go back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={this.togglePlay}>
+          <Text>{this.state.playing ? "Pause" : "Play"}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={this.goForward}>
+          <Text>Go forward</Text>
+        </TouchableOpacity>
       </View>
     );
   }
