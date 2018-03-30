@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { ImageBackground, Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Video from "react-native-video";
 import Slider from "react-native-slider";
 import songs from "./mockData";
@@ -26,23 +26,10 @@ class Player extends Component {
     };
   }
 
-
   componentWillMount(){
     this.getSongs();
   }
-
-  getSongs = () => {
-   
-    fetch("https://api.jamendo.com/v3.0/tracks/?client_id=77203514&format=jsonpretty&order=popularity_month")
-            .then( (response) => {
-                return response.json() })   
-                    .then( (json) => {
-                        this.setState({songList: json.results});
-                    });
-
-  }
   
-
   startCurrSong = () => {
     this.video.seek(0);
   };
@@ -109,6 +96,15 @@ class Player extends Component {
 
   secondToSlider = () => this.state.currentTime / this.state.songDuration;
 
+  getSongs = () => {
+    fetch("https://api.jamendo.com/v3.0/tracks/?client_id=77203514&format=jsonpretty&order=popularity_month")
+            .then( (response) => {
+                return response.json() })   
+                    .then( (json) => {
+                        this.setState({songList: json.results});
+                    });
+  }
+
   render() {
 
     var songProperties = [];
@@ -124,12 +120,17 @@ class Player extends Component {
     songTitle = songProperties[1]
     
     return (
-      <View style={{ flex: 3, flexDirection: 'column' }}>
-        <Image
-          resizeMode='contain'
-          style={{flex:2, height: 30, alignContent:'center', marginTop: 20}}
-          source={{uri: album_image}}
-        /> 
+
+      <ImageBackground style={{ flex: 3, flexDirection: 'column' }} source={require('./Images/Background.jpg')} >
+        <View style={styles.shadow}>
+          <Image
+            resizeMode="contain"
+            style={{flex:1,alignContent:'center'}}
+            source={{uri: album_image}}
+          /> 
+        </View>
+        
+
         <Video
           source={{uri: audio}}
           volume={this.state.muted ? 0 : 1.0}
@@ -143,7 +144,9 @@ class Player extends Component {
             this.video = v;
           }}
         />
+
         <Slider value={this.secondToSlider()} onValueChange={this.onSlide} />
+
         <View style={{flex: 1}}>
           <View style={styles.timer}>
             <Text style={{flex: 1, marginLeft: 20}}>{formattedTime(this.state.currentTime)}</Text>
@@ -156,9 +159,9 @@ class Player extends Component {
               <TouchableOpacity style={styles.back} onPress={this.goBackward}>
                 <Icon name="previous" color="#000" size={30}/>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.play} onPress={this.togglePlay}>
+              <TouchableOpacity style={styles.play} onPress={this.togglePlay} >
                 {this.state.playing ? <Icon name="pause" color="#000" size={50} /> : <Icon name="play" color="#000" size={50} />}
-              </TouchableOpacity>
+              </TouchableOpacity >
               <TouchableOpacity style={styles.forward} onPress={this.goForward}>
                 <Icon name="next" color="#000" size={30}/>
               </TouchableOpacity>
@@ -166,7 +169,7 @@ class Player extends Component {
           </View>
 
         </View>
-      </View>
+      </ImageBackground>
     );
   }
 }
@@ -194,6 +197,15 @@ const styles = StyleSheet.create({
   timer: {
     flex: 2,
     flexDirection: 'row'
+  },
+  shadow: {
+    flex:2,
+    margin:20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 20, 
+  
   }
 });
 
