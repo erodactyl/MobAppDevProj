@@ -22,6 +22,7 @@ class Player extends Component {
       songIndex: 0,
       songs: songs[0].songs,
       songDuration: 1,
+      volume:  1,
       songList: []
     };
   }
@@ -88,10 +89,14 @@ class Player extends Component {
     this.setState({ songDuration: params.duration });
   };
 
-  onSlide = slide => {
+  onAudioSlide = slide => {
     this.setState({ slide });
     const seconds = slide * this.state.songDuration;
     this.video.seek(seconds);
+  };
+
+  onVolumeSlide = volume => {
+    this.setState({ volume });
   };
 
   secondToSlider = () => this.state.currentTime / this.state.songDuration;
@@ -133,7 +138,7 @@ class Player extends Component {
 
         <Video
           source={{uri: audio}}
-          volume={this.state.muted ? 0 : 1.0}
+          volume={this.state.volume}
           muted={false}
           paused={!this.state.playing}
           onLoad={this.onLoad}
@@ -145,14 +150,23 @@ class Player extends Component {
           }}
         />
 
-        <Slider value={this.secondToSlider()} onValueChange={this.onSlide} />
-
+        <Slider
+          value={this.secondToSlider()}
+          onValueChange={this.onAudioSlide}
+        />
         <View style={{flex: 1}}>
           <View style={styles.timer}>
             <Text style={{flex: 1, marginLeft: 20}}>{formattedTime(this.state.currentTime)}</Text>
             <Text style={{flex: 1, marginLeft: 240}}>{formattedTime(this.state.songDuration)}</Text>
           </View>
-
+        <View style={{marginLeft: 10}}>
+          <Text>
+             Volume
+          </Text>
+        </View>
+        </View>
+        <Slider value={this.state.volume} onValueChange={this.onVolumeSlide} />
+        <View style={{flex: 1}}>
           <View style={{flex: 6}}>
             <Text style={{alignSelf: 'center', fontSize: 20}} > {songTitle} </Text>
             <View style={styles.controls}>
@@ -195,11 +209,11 @@ const styles = StyleSheet.create({
     marginBottom: 3
   },
   timer: {
-    flex: 2,
+    flex: 1,
     flexDirection: 'row'
   },
   shadow: {
-    flex:2,
+    flex: 4,
     margin:20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
