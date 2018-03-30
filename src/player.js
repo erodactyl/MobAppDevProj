@@ -3,10 +3,17 @@ import { Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Video from "react-native-video";
 import Slider from "react-native-slider";
 import songs from "./mockData";
+import Icon from 'react-native-vector-icons/Foundation';
+
+const playButton = (<Icon name="play" color="#000" />)
+const pauseButton = (<Icon name="pause" size={100} color="#000" />)
+const nextButton = (<Icon name="next" size={100} color="#000" />)
+const previousButton = (<Icon name="previous" size={100} color="#000" />)
+
 
 class Player extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       playing: true,
       muted: false,
@@ -14,9 +21,27 @@ class Player extends Component {
       currentTime: 0,
       songIndex: 0,
       songs: songs[0].songs,
-      songDuration: 1
+      songDuration: 1,
+      songList: []
     };
   }
+
+
+  componentWillMount(){
+    this.getSongs();
+  }
+
+  getSongs = () => {
+   
+    fetch("https://api.jamendo.com/v3.0/tracks/?client_id=77203514&format=jsonpretty&order=popularity_month")
+            .then( (response) => {
+                return response.json() })   
+                    .then( (json) => {
+                        this.setState({songList: json.results});
+                    });
+
+  }
+  
 
   startCurrSong = () => {
     this.video.seek(0);
@@ -51,8 +76,9 @@ class Player extends Component {
   goForward = () => {
     this.setState(state => ({
       songIndex:
-        state.songIndex === state.songs.length - 1 ? 0 : state.songIndex + 1,
+        state.songIndex === state.songList.length - 1 ? 0 : state.songIndex + 1,
       currentTime: 0
+
     }));
     this.startCurrSong();
   };
@@ -84,11 +110,28 @@ class Player extends Component {
   secondToSlider = () => this.state.currentTime / this.state.songDuration;
 
   render() {
-    const song = this.state.songs[this.state.songIndex];
+
+    var songProperties = [];
+
+    for (let prop in this.state.songList[this.state.songIndex]) {
+      songProperties.push(this.state.songList[this.state.songIndex][prop]);
+    }
+    
+    console.log(this.state.songList)
+    
+    album_image = songProperties[11]
+    audio = songProperties[12]
+    songTitle = songProperties[1]
+    
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 3, flexDirection: 'column' }}>
+        <Image
+          resizeMode='contain'
+          style={{flex:2, height: 30, alignContent:'center', marginTop: 20}}
+          source={{uri: album_image}}
+        /> 
         <Video
-          source={{ uri: song.url }}
+          source={{uri: audio}}
           volume={this.state.muted ? 0 : 1.0}
           muted={false}
           paused={!this.state.playing}
@@ -101,117 +144,56 @@ class Player extends Component {
           }}
         />
         <Slider value={this.secondToSlider()} onValueChange={this.onSlide} />
-        <Text>{this.state.songDuration}</Text>
-        <TouchableOpacity onPress={this.goBackward}>
-          <Text>Go back</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.togglePlay}>
-          <Text>{this.state.playing ? "Pause" : "Play"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.goForward}>
-          <Text>Go forward</Text>
-        </TouchableOpacity>
+        <View style={{flex: 1}}>
+          <View style={styles.timer}>
+            <Text style={{flex: 1, marginLeft: 20}}>{formattedTime(this.state.currentTime)}</Text>
+            <Text style={{flex: 1, marginLeft: 240}}>{formattedTime(this.state.songDuration)}</Text>
+          </View>
+
+          <View style={{flex: 6}}>
+            <Text style={{alignSelf: 'center', fontSize: 20}} > {songTitle} </Text>
+            <View style={styles.controls}>
+              <TouchableOpacity style={styles.back} onPress={this.goBackward}>
+                <Icon name="previous" color="#000" size={30}/>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.play} onPress={this.togglePlay}>
+                {this.state.playing ? <Icon name="pause" color="#000" size={50} /> : <Icon name="play" color="#000" size={50} />}
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.forward} onPress={this.goForward}>
+                <Icon name="next" color="#000" size={30}/>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+        </View>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "#000"
-  },
-  header: {
-    marginTop: 17,
-    marginBottom: 17,
+  controls: {
+    alignItems: 'center',
+    flex:3,
+    flexDirection: 'row',
     width: window.width
   },
-  headerClose: {
-    position: "absolute",
-    top: 10,
-    left: 0,
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 20,
-    paddingRight: 20
-  },
-  headerText: {
-    color: "#FFF",
-    fontSize: 18,
-    textAlign: "center"
-  },
-  songImage: {
-    marginBottom: 20
-  },
-  songTitle: {
-    color: "white",
-    fontFamily: "Helvetica Neue",
-    marginBottom: 10,
-    marginTop: 13,
-    fontSize: 19
-  },
-  albumTitle: {
-    color: "#BBB",
-    fontFamily: "Helvetica Neue",
-    fontSize: 14,
-    marginBottom: 20
-  },
-  controls: {
-    flexDirection: "row",
-    marginTop: 30
-  },
   back: {
-    marginTop: 22,
-    marginLeft: 45
+    flex: 1,
+    alignItems: 'flex-end',
+    marginBottom: 3
   },
   play: {
-    marginLeft: 50,
-    marginRight: 50
+    flex: 1,
+    alignItems: 'center'
   },
   forward: {
-    marginTop: 22,
-    marginRight: 45
-  },
-  shuffle: {
-    marginTop: 26
-  },
-  volume: {
-    marginTop: 26
-  },
-  sliderContainer: {
-    width: window.width - 40
-  },
-  timeInfo: {
-    flexDirection: "row"
-  },
-  time: {
-    color: "#FFF",
     flex: 1,
-    fontSize: 10
+    marginBottom: 3
   },
-  timeRight: {
-    color: "#FFF",
-    textAlign: "right",
-    flex: 1,
-    fontSize: 10
-  },
-  slider: {
-    height: 20
-  },
-  sliderTrack: {
-    height: 2,
-    backgroundColor: "#333"
-  },
-  sliderThumb: {
-    width: 10,
-    height: 10,
-    backgroundColor: "#f62976",
-    borderRadius: 10 / 2,
-    shadowColor: "red",
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 2,
-    shadowOpacity: 1
+  timer: {
+    flex: 2,
+    flexDirection: 'row'
   }
 });
 
