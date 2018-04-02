@@ -120,6 +120,7 @@ class Player extends Component {
     
     console.log(this.state.songList)
     
+    duration = songProperties[9]
     album_image = songProperties[11]
     audio = songProperties[12]
     songTitle = songProperties[1]
@@ -130,7 +131,7 @@ class Player extends Component {
         <View style={styles.shadow}>
           <Image
             resizeMode="contain"
-            style={{flex:1,alignContent:'center'}}
+            style={{flex:1,alignContent:'center', marginTop: 30}}
             source={{uri: album_image}}
           /> 
         </View>
@@ -159,14 +160,8 @@ class Player extends Component {
             <Text style={{flex: 1, marginLeft: 20}}>{formattedTime(this.state.currentTime)}</Text>
             <Text style={{flex: 1, marginLeft: 240}}>{formattedTime(this.state.songDuration)}</Text>
           </View>
-        <View style={{marginLeft: 10}}>
-          <Text>
-             Volume
-          </Text>
         </View>
-        </View>
-        <Slider value={this.state.volume} onValueChange={this.onVolumeSlide} />
-        <View style={{flex: 1}}>
+        <View style={{flex: 1, marginBottom: 10}}>
           <View style={{flex: 6}}>
             <Text style={{alignSelf: 'center', fontSize: 20}} > {songTitle} </Text>
             <View style={styles.controls}>
@@ -183,6 +178,10 @@ class Player extends Component {
           </View>
 
         </View>
+        <View style={{alignItems: "center", marginBottom: 20}}>
+
+            <Slider style={{width: 200}}value={this.state.volume} onValueChange={this.onVolumeSlide} />
+          </View>
       </ImageBackground>
     );
   }
