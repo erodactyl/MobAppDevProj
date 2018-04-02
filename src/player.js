@@ -10,7 +10,6 @@ const pauseButton = (<Icon name="pause" size={100} color="#000" />)
 const nextButton = (<Icon name="next" size={100} color="#000" />)
 const previousButton = (<Icon name="previous" size={100} color="#000" />)
 
-
 class Player extends Component {
   constructor(props) {
     super(props);
@@ -22,15 +21,15 @@ class Player extends Component {
       songIndex: 0,
       songs: songs[0].songs,
       songDuration: 1,
-      volume:  1,
+      volume: 1,
       songList: []
     };
   }
 
-  componentWillMount(){
+  componentWillMount() {
     this.getSongs();
   }
-  
+
   startCurrSong = () => {
     this.video.seek(0);
   };
@@ -103,11 +102,12 @@ class Player extends Component {
 
   getSongs = () => {
     fetch("https://api.jamendo.com/v3.0/tracks/?client_id=77203514&format=jsonpretty&order=popularity_month")
-            .then( (response) => {
-                return response.json() })   
-                    .then( (json) => {
-                        this.setState({songList: json.results});
-                    });
+      .then((response) => {
+        return response.json()
+      })
+      .then((json) => {
+        this.setState({ songList: json.results });
+      });
   }
 
   render() {
@@ -117,28 +117,28 @@ class Player extends Component {
     for (let prop in this.state.songList[this.state.songIndex]) {
       songProperties.push(this.state.songList[this.state.songIndex][prop]);
     }
-    
+
     console.log(this.state.songList)
-    
+
     duration = songProperties[9]
     album_image = songProperties[11]
     audio = songProperties[12]
     songTitle = songProperties[1]
-    
+
     return (
 
       <ImageBackground style={{ flex: 3, flexDirection: 'column' }} source={require('./Images/Background.jpg')} >
         <View style={styles.shadow}>
           <Image
             resizeMode="contain"
-            style={{flex:1,alignContent:'center', marginTop: 30}}
-            source={{uri: album_image}}
-          /> 
+            style={{ flex: 1, alignContent: 'center', marginTop: 30 }}
+            source={{ uri: album_image }}
+          />
         </View>
-        
+
 
         <Video
-          source={{uri: audio}}
+          source={{ uri: audio }}
           volume={this.state.volume}
           muted={false}
           paused={!this.state.playing}
@@ -155,33 +155,32 @@ class Player extends Component {
           value={this.secondToSlider()}
           onValueChange={this.onAudioSlide}
         />
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View style={styles.timer}>
-            <Text style={{flex: 1, marginLeft: 20}}>{formattedTime(this.state.currentTime)}</Text>
-            <Text style={{flex: 1, marginLeft: 240}}>{formattedTime(this.state.songDuration)}</Text>
+            <Text style={{ flex: 1, marginLeft: 20 }}>{formattedTime(this.state.currentTime)}</Text>
+            <Text style={{ flex: 1, marginLeft: 240 }}>{formattedTime(this.state.songDuration)}</Text>
           </View>
         </View>
-        <View style={{flex: 1, marginBottom: 10}}>
-          <View style={{flex: 6}}>
-            <Text style={{alignSelf: 'center', fontSize: 20}} > {songTitle} </Text>
+        <View style={{ flex: 1, marginBottom: 10 }}>
+          <View style={{ flex: 6 }}>
+            <Text style={{ alignSelf: 'center', fontSize: 20 }} > {songTitle} </Text>
             <View style={styles.controls}>
               <TouchableOpacity style={styles.back} onPress={this.goBackward}>
-                <Icon name="previous" color="#000" size={30}/>
+                <Icon name="previous" color="#000" size={30} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.play} onPress={this.togglePlay} >
                 {this.state.playing ? <Icon name="pause" color="#000" size={50} /> : <Icon name="play" color="#000" size={50} />}
               </TouchableOpacity >
               <TouchableOpacity style={styles.forward} onPress={this.goForward}>
-                <Icon name="next" color="#000" size={30}/>
+                <Icon name="next" color="#000" size={30} />
               </TouchableOpacity>
             </View>
           </View>
 
         </View>
-        <View style={{alignItems: "center", marginBottom: 20}}>
-
-            <Slider style={{width: 200}}value={this.state.volume} onValueChange={this.onVolumeSlide} />
-          </View>
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
+          <Slider style={{ width: 200 }} value={this.state.volume} onValueChange={this.onVolumeSlide} />
+        </View>
       </ImageBackground>
     );
   }
@@ -190,7 +189,7 @@ class Player extends Component {
 const styles = StyleSheet.create({
   controls: {
     alignItems: 'center',
-    flex:3,
+    flex: 3,
     flexDirection: 'row',
     width: window.width
   },
@@ -213,12 +212,11 @@ const styles = StyleSheet.create({
   },
   shadow: {
     flex: 4,
-    margin:20,
+    margin: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
-    shadowRadius: 20, 
-  
+    shadowRadius: 20
   }
 });
 
